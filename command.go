@@ -187,7 +187,7 @@ func (c Command) defineCommands() {
 			errorPopup(err)
 		}
 
-		infoPopup("successfully reload config file")
+		infoPopup("successfully reloaded config file")
 	})
 
 	/* Queue */

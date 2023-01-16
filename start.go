@@ -220,71 +220,104 @@ module Keybinds {
 	return nil
 }
 
+type Config struct {
+	General struct {
+		confirm_bulk_add   bool     `yaml:"confirm_bulk_add"`
+		confirm_on_exit    bool     `yaml:"confirm_on_exit"`
+		queue_loop         bool     `yaml:"queue_loop"`
+		load_prev_queue    bool     `yaml:"load_prev_queue"`
+		popup_timeout      int16    `yaml:"popup_timeout"`
+		sort_by_mtime      bool     `yaml:"sort_by_mtime"`
+		music_dirs         []string `yaml:",flow"`
+		history_path       string   `yaml:"history_path"`
+		use_emoji          bool     `yaml:"use_emoji"`
+		volume             int16    `yaml:"volume"`
+		invidious_instance string   `yaml:"invidious_instance"`
+		lang_lyrics        []string `yaml:"lang_lyrics":,flow`
+		rename_bytag       bool     `yaml:"rename_bytag"`
+	} `yaml:"general"`
+	Emoji struct {
+		playlist string `yaml:"playlist"`
+		file     string `yaml:"file"`
+		loop     string `yaml:"loop"`
+		shuffle  string `yaml:"shuffle"`
+		noloop   string `yaml:"noloop"`
+	} `yaml:"emoji"`
+	// TODO: use CSS
+	Color struct {
+		accent     string `yaml:"accent"`
+		background string `yaml:"background"`
+		foreground string `yaml:"foreground"`
+		popup      string `yaml:"popup"`
+
+		playlist struct {
+			directory string `yaml:"directory"`
+			highlight string `yaml:"highlight"`
+		} `yaml:"playlist"`
+
+		queue_highlight string `yaml:"queue_highlight"`
+
+		now_playing struct {
+			artist string `yaml:"artist"`
+			title  string `yaml:"title"`
+			album  string `yaml:"album"`
+		} `yaml:"now_playing"`
+
+		subtitle string `yaml:"subtitle"`
+	} `yaml:"color"`
+}
+
 // executes user config with default config is executed first in order to apply
 // default values
 func execConfig(config string) error {
 
 	const defaultConfig = `
-
-module General {
-	# confirmation popup to add the whole playlist to the queue
-	confirm_bulk_add    = true
-	confirm_on_exit     = true
-	queue_loop          = false
-	load_prev_queue     = true
-	popup_timeout       = "5s"
-	sort_by_mtime       = false
-	# change this to directory that contains mp3 files
-	music_dir           = "~/Music"
-	# url history of downloaded audio will be saved here
-	history_path        = "~/.local/share/gomu/urls"
-	# some of the terminal supports unicode character
-	# you can set this to true to enable emojis
-	use_emoji           = true
-	# initial volume when gomu starts up
-	volume              = 80
-	# if you experiencing error using this invidious instance, you can change it
-	# to another instance from this list:
-	# https://github.com/iv-org/documentation/blob/master/Invidious-Instances.md
-	invidious_instance  = "https://vid.puffyan.us"
-	# Prefered language for lyrics to be displayed, if not available, english version
-	# will be displayed.
-	# Available tags: en,el,ko,es,th,vi,zh-Hans,zh-Hant,zh-CN and can be separated with comma.
-	# find more tags: youtube-dl --skip-download --list-subs "url"
-	lang_lyric          = "en"
-	# When save tag, could rename the file by tag info: artist-songname-album
-	rename_bytag        = false
-}
-
-module Emoji {
-	# default emoji here is using awesome-terminal-fonts
-	# you can change these to your liking
-	playlist     = ""
-	file         = ""
-	loop         = "ﯩ"
-	noloop       = ""
-}
-
-module Color {
-	# you may choose colors by pressing 'c'
-	accent            = "darkcyan"
-	background        = "none"
-	foreground        = "white"
-	popup             = "black"
-
-	playlist_directory = "darkcyan"
-	playlist_highlight = "darkcyan"
-
-	queue_highlight    = "darkcyan"
-
-	now_playing_title = "darkgreen"
-	subtitle          = "darkgoldenrod"
-}
-
-# you can get the syntax highlighting for this language here:
-# https://github.com/mattn/anko/tree/master/misc/vim
-# vim: ft=anko
-`
+	general:
+		# Confirmation popup for adding the whole playlist to the queue
+		confirm_bulk_add: true
+		confirm_on_exit: true
+		queue_loop: false
+		load_prev_queue: true
+		popup_timeout: 5
+		sort_by_mtime: false
+		music_dirs: ["$HOME/Music"]
+		# url history of downloaded audio will be saved here
+		history_path: $HOME/.local/share/gomu/urls
+		# Some terminals support unicode characters, set this to false if you want to use ascii characters instead
+		use_emoji: true
+		volume: 80	
+		# See https://github.com/iv-org/documentation/blob/master/Invidious-Instances.md
+		invidious_instance: "https://vid.puffyan.us"
+		lang_lyrics: ["en"]
+		# When saving tags, rename the the file as per the tags (artist-songname-album)
+		rename_bytag: false
+	emoji:
+		playlist: "📁"
+		file: "🎵"
+		loop: "🔁"
+		noloop: ""
+		shuffle: "🔀"
+	color:
+		#you may change colors by pressing 'c'
+		accent: "darkcyan"
+		background: "none"
+		foreground: "white"
+		popup: "black"
+		playlist:
+			directory: "darkcyan"
+			highlight: "darkcyan"
+		queue_highlight: "darkcyan"
+		now_playing:
+			artist: "lightgreen"
+			title: "green"
+			album: "darkgreen"
+		subtitle: "darkgoldenrod"
+	`
+	// if the function is not called by defineCommands, then the config is Args.config
+	args := getArgs()
+	if config == "" {
+		config = *args.config
+	}
 
 	cfg := expandTilde(config)
 

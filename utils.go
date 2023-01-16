@@ -113,7 +113,14 @@ func expandTilde(_path string) string {
 		die(err)
 	}
 
-	return path.Join(home, strings.TrimPrefix(_path, "~"))
+	expandedPath := path.Join(home, strings.TrimPrefix(_path, "~"))
+
+	// check that the expanded path is a subdir of user's home dir to avoid path traversal
+	if !strings.HasPrefix(expandedPath, home) {
+		die(errors.New("Invalid path"))
+	}
+
+	return expandedPath
 }
 
 // Detects the filetype of file
