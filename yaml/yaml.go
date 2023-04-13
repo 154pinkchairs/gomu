@@ -28,4 +28,13 @@ func Parse(confFile string) (*Config, error) {
 		opt.Parser = yamlv3.Parser()
 		opt.DecoderConfig.TagName = "yaml"
 	})
+
+	config.AddDriver(yamlv3.Driver)
+
+	err := config.LoadFiles(confFile)
+	if err != nil {
+		log.Println("error loading config file", err)
+		return nil, err
+	}
+
 }
